@@ -16,9 +16,14 @@ The `Sudoku` template takes a 9x9 grid of numbers (1-9) as input and checks:
 ### Files
 
 - `circuits/sudoku.circom`: The main Sudoku verification circuit
-- `test/input.json`: Valid Sudoku test input
-- `test/invalid.json`: Invalid Sudoku test input (contains duplicates)
-- `test/test.js`: Test script using snarkjs
+- `circuits/main.circom`: Main component instantiation
+- `test/input.json`: Valid Sudoku test input (original)
+- `test/valid2.json`: Valid Sudoku test input (shifted pattern)
+- `test/invalid.json`: Invalid Sudoku test input (row duplicate)
+- `test/invalid_column.json`: Invalid Sudoku test input (column duplicate)
+- `test/invalid_box.json`: Invalid Sudoku test input (3x3 box duplicate)
+- `test/invalid_range.json`: Invalid Sudoku test input (number out of 1-9 range)
+- `test/test.js`: Comprehensive test script using snarkjs
 - `package.json`: Project configuration with compilation and test scripts
 
 ### Setup
@@ -44,4 +49,7 @@ The `Sudoku` template takes a 9x9 grid of numbers (1-9) as input and checks:
    npm test
    ```
 
-The test will verify that valid Sudoku inputs are accepted and invalid ones are rejected.
+The test will run multiple scenarios:
+- Valid Sudoku inputs (should pass)
+- Invalid inputs with duplicates in rows, columns, or 3x3 boxes (should fail)
+- Invalid inputs with numbers outside 1-9 range (should fail)
