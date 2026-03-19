@@ -39,12 +39,37 @@ The `Sudoku` template takes a 9x9 grid of numbers (1-9) as input and checks:
 
 ### Usage
 
+1. Set up the circuit for Groth16 proving:
+   ```
+   npm run setup
+   ```
+   This will compile the circuit and perform the trusted setup ceremony.
+
+2. Run the end-to-end tests:
+   ```
+   npm test
+   ```
+
+### Manual Setup Steps
+
+If you prefer to run the setup steps manually:
+
 1. Compile the circuit:
    ```
    npm run compile:sudoku
    ```
 
-2. Run tests:
+2. Generate powers of tau:
+   ```
+   npm run setup:powersoftau
+   ```
+
+3. Set up Groth16:
+   ```
+   npm run setup:groth16
+   ```
+
+4. Run tests:
    ```
    npm test
    ```

@@ -20,9 +20,11 @@ async function testSudoku() {
     // Check if compiled files exist
     const wasmFile = path.join(buildDir, "main_js", "main.wasm");
     const r1csFile = path.join(buildDir, "main.r1cs");
+    const zkeyFile = path.join(buildDir, "main_0001.zkey");
+    const vkeyFile = path.join(buildDir, "verification_key.json");
 
-    if (!fs.existsSync(wasmFile) || !fs.existsSync(r1csFile)) {
-        console.log("Circuit not compiled. Run 'npm run compile:sudoku' first.\n");
+    if (!fs.existsSync(wasmFile) || !fs.existsSync(r1csFile) || !fs.existsSync(zkeyFile) || !fs.existsSync(vkeyFile)) {
+        console.log("Circuit not fully set up. Run 'npm run setup' first.\n");
         return;
     }
 
@@ -40,14 +42,23 @@ async function testSudoku() {
         try {
             const input = JSON.parse(fs.readFileSync(inputPath, "utf8"));
             const startTime = Date.now();
-            const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, wasmFile, r1csFile);
+            const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, wasmFile, zkeyFile);
             const endTime = Date.now();
 
-            if (testCase.expected) {
+            // Verify the proof
+            const vKey = JSON.parse(fs.readFileSync(vkeyFile, "utf8"));
+            const res = await snarkjs.groth16.verify(vKey, publicSignals, proof);
+
+            if (testCase.expected && res) {
                 console.log(`  ✓ Passed (${endTime - startTime}ms)`);
                 passed++;
+            } else if (!testCase.expected && !res) {
+                console.log(`  ✓ Correctly rejected (${endTime - startTime}ms)`);
+                passed++;
+            } else if (testCase.expected && !res) {
+                console.log(`  ✗ Failed: Proof generated but verification failed`);
             } else {
-                console.log(`  ✗ Failed: Expected rejection but was accepted`);
+                console.log(`  ✗ Failed: Expected rejection but proof was verified`);
             }
         } catch (error) {
             if (!testCase.expected) {
@@ -62,9 +73,9 @@ async function testSudoku() {
 
     console.log(`Results: ${passed}/${total} tests passed`);
     if (passed === total) {
-        console.log("🎉 All tests passed!");
+        console.log("All tests passed!");
     } else {
-        console.log("❌ Some tests failed.");
+        console.log("Some tests failed.");
     }
 }
 
